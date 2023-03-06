@@ -21,3 +21,8 @@ Additional header information may be specified both for the original version as 
 
 ![Demo](https://raw.githubusercontent.com/werkraum-media/abtest/master/Documentation/Images/demo.gif)
 
+### Known issues
+
+This extension currently does not support typeNum.
+
+It always checks requested page for a variant.

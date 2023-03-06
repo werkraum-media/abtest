@@ -23,9 +23,7 @@ declare(strict_types=1);
 
 namespace WerkraumMedia\ABTest;
 
-use TYPO3\CMS\Core\SingletonInterface;
-
-class Cookie implements SingletonInterface
+class Cookie
 {
     /**
      * @var int

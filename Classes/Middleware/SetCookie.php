@@ -29,6 +29,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Symfony\Component\HttpFoundation\Cookie as SymfonyCookie;
 use WerkraumMedia\ABTest\Cookie;
+use WerkraumMedia\ABTest\Events\SwitchedToVariant;
 
 class SetCookie implements MiddlewareInterface
 {
@@ -41,6 +42,14 @@ class SetCookie implements MiddlewareInterface
         Cookie $cookie
     ) {
         $this->cookie = $cookie;
+    }
+
+    public function handleVariant(SwitchedToVariant $event): void
+    {
+        $targetPage = $event->getVariantPage();
+        $this->cookie->setRequestedPage((int)$event->getOriginalPage()['uid']);
+        $this->cookie->setActualPage((int)$targetPage['uid']);
+        $this->cookie->setLifetime((int)$targetPage['tx_abtest_cookie_time']);
     }
 
     public function process(

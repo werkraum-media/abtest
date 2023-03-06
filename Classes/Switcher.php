@@ -24,9 +24,10 @@ declare(strict_types=1);
 namespace WerkraumMedia\ABTest;
 
 use DeviceDetector\DeviceDetector;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Http\ServerRequest;
-use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
+use WerkraumMedia\ABTest\Events\SwitchedToVariant;
 
 /**
  * Will decide whether to switch to another variant.
@@ -35,31 +36,28 @@ class Switcher
 {
     private PageRepository $pageRepository;
 
-    private Cookie $cookie;
+    private EventDispatcher $eventDispatcher;
 
     public function __construct(
         PageRepository $pageRepository,
-        Cookie $cookie
+        EventDispatcher $eventDispatcher
     ) {
         $this->pageRepository = $pageRepository;
-        $this->cookie = $cookie;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function determineContentId(
-        array $params,
-        TypoScriptFrontendController $frontendController
-    ): void {
+    public function switch(TypoScriptFrontendController $frontendController): void
+    {
         if ($this->isRequestByBot()) {
             return;
         }
 
         $currentPageId = $frontendController->id;
         if (is_numeric($currentPageId) === false) {
-            $currentPageId = $this->getRootPageId();
-        } else {
-            $currentPageId = (int)$currentPageId;
+            return;
         }
 
+        $currentPageId = (int)$currentPageId;
         if ($currentPageId === 0) {
             return;
         }
@@ -85,9 +83,10 @@ class Switcher
             $this->pageRepository->updateCounter((int)$targetPage['uid'], ++$targetPage['tx_abtest_counter']);
         }
 
-        $this->cookie->setRequestedPage($currentPageId);
-        $this->cookie->setActualPage($targetPage['uid']);
-        $this->cookie->setLifetime($targetPage['tx_abtest_cookie_time']);
+        $this->eventDispatcher->dispatch(new SwitchedToVariant(
+            $currentPagePropertiesArray,
+            $targetPage
+        ));
     }
 
     private function isRequestByBot(): bool
@@ -101,19 +100,6 @@ class Switcher
         }
 
         return false;
-    }
-
-    /**
-     * Returns 0 if no site could be fetched.
-     */
-    private function getRootPageId(): int
-    {
-        $site = $this->getRequest()->getAttribute('site');
-        if (!$site instanceof Site) {
-            return 0;
-        }
-
-        return $site->getRootPageId();
     }
 
     private function getRequest(): ServerRequest
@@ -140,10 +126,5 @@ class Switcher
         }
 
         return $page;
-    }
-
-    public static function register(): void
-    {
-        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/class.tslib_fe.php']['determineId-PostProc'][self::class] = self::class . '->determineContentId';
     }
 }

@@ -21,8 +21,17 @@ Additional header information may be specified both for the original version as 
 
 ![Demo](https://raw.githubusercontent.com/werkraum-media/abtest/master/Documentation/Images/demo.gif)
 
+### Matomo A/B integration
+
+Provides an integration for "A/B Testing - Experiments" https://matomo.org/a-b-testing/.
+This is currently enabled out of the box and integrated into this extension.
+That is because we need this for one of our customers.
+We didn't think it is worth it to split it up into this own extension right now.
+
+You can disable the corresponding event listener and hide the corresponding fields.
+
 ### Known issues
 
 This extension currently does not support typeNum.
 
-It always checks requested page for a variant.
+It always checks requested page for a variant, and it always adds the tracking code.

@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace WerkraumMedia\ABTest\TCA;
 
-use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 
 class VariantFilter
@@ -36,7 +35,7 @@ class VariantFilter
         $this->pageRepository = $pageRepository;
     }
 
-    public function doFilter(array $parameters, DataHandler $dataHandler): array
+    public function doFilter(array $parameters): array
     {
         return array_filter($parameters['values'], [$this, 'filterPage']);
     }

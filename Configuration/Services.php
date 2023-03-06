@@ -7,6 +7,7 @@ namespace DanielSiepmann\Configuration;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use WerkraumMedia\ABTest\Events\SwitchedToVariant;
 use WerkraumMedia\ABTest\Hook\TypoScriptFrontendController;
+use WerkraumMedia\ABTest\MatomoTracker;
 use WerkraumMedia\ABTest\Middleware\SetCookie;
 use WerkraumMedia\ABTest\TCA\VariantFilter;
 
@@ -23,6 +24,10 @@ return static function (ContainerConfigurator $containerConfigurator) {
     $services->set(TypoScriptFrontendController::class)->public();
     $services->set(VariantFilter::class)->public();
     $services->set(SetCookie::class)->tag('event.listener', [
+        'method' => 'handleVariant',
+        'event' => SwitchedToVariant::class,
+    ]);
+    $services->set(MatomoTracker::class)->tag('event.listener', [
         'method' => 'handleVariant',
         'event' => SwitchedToVariant::class,
     ]);

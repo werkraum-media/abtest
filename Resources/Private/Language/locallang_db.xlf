@@ -9,8 +9,14 @@
             <trans-unit id="pages.tx_abtest_variant" approved="yes">
                 <source>Variant</source>
             </trans-unit>
+            <trans-unit id="pages.tx_abtest_variant.description" approved="yes">
+                <source>The selected page will be used as Variation of this page.</source>
+            </trans-unit>
             <trans-unit id="pages.tx_abtest_cookie_time" approved="yes">
                 <source>Cookie Lifetime</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_cookie_time.description" approved="yes">
+                <source>Defines how long the selected variation should be saved on the visitors end. The visitor will see the same variation until end of this period.</source>
             </trans-unit>
             <trans-unit id="pages.tx_abtest_cookie_time.cookie_1_month" approved="yes">
                 <source>1 month</source>
@@ -32,6 +38,28 @@
             </trans-unit>
             <trans-unit id="pages.tx_abtest_counter" approved="yes">
                 <source>Counter</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_counter.description" approved="yes">
+                <source>Only technical. Defines how often the page was shown to visitors. Used to determine whether to show this or a variant to next visitor.</source>
+            </trans-unit>
+
+            <trans-unit id="pages.palette_tx_abtest_matomo" approved="yes">
+                <source>Matomo</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_matomo_experiment_id" approved="yes">
+                <source>Matomo Experiment ID</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_matomo_experiment_id.description" approved="yes">
+                <source>Either the name of the experiment, or the technical ID to not expose the name in source code.</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_matomo_variant_id" approved="yes">
+                <source>Matomo Variant ID</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_matomo_variant_id.description" approved="yes">
+                <source>Either the name of the variant, or the technical ID to not expose the name in source code.</source>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_matomo_variant_id.original" approved="yes">
+                <source>Original</source>
             </trans-unit>
         </body>
     </file>

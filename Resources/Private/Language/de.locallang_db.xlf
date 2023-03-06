@@ -11,9 +11,17 @@
                 <source>Variant</source>
                 <target>Variante</target>
             </trans-unit>
+            <trans-unit id="pages.tx_abtest_variant.description" approved="yes">
+                <source>The selected page will be used as Variation of this page.</source>
+                <target>Die ausgewählte Seite wird als Variante dieser Seite genutzt.</target>
+            </trans-unit>
             <trans-unit id="pages.tx_abtest_cookie_time" approved="yes">
                 <source>Cookie Lifetime</source>
                 <target>Cookie Lebenszeit</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_cookie_time.description" approved="yes">
+                <source>Defines how long the selected variation should be saved on the visitors end. The visitor will see the same variation until end of this period.</source>
+                <target>Definiert wie lange ein Besucher die ausgewählte Variante sehen soll. Nach Ablauf der Zeit wird die anzuzeigende Variante neu bestimmt.</target>
             </trans-unit>
             <trans-unit id="pages.tx_abtest_cookie_time.cookie_1_month" approved="yes">
                 <source>1 month</source>
@@ -42,6 +50,35 @@
             <trans-unit id="pages.tx_abtest_counter" approved="yes">
                 <source>Counter</source>
                 <target>Zähler</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_counter.description" approved="yes">
+                <source>Only technical. defines how often the page was shown to visitors. Used to determine whether to show this or a variant to next visitor.</source>
+                <target>Rein technisch. Definiert wie viele Besucher diese Seite gesehen haben. Wird genutzt um zu bestimmen ob diese Seite oder eine Variante angezeigt werden soll.</target>
+            </trans-unit>
+
+            <trans-unit id="pages.palette_tx_abtest_matomo" approved="yes">
+                <source>Matomo</source>
+                <target>Matomo</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_matomo_experiment_id" approved="yes">
+                <source>Matomo Experiment ID</source>
+                <target>Matomo Experiment ID</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_matomo_experiment_id.description" approved="yes">
+                <source>Either the name of the experiment, or the technical ID to not expose the name in source code.</source>
+                <target>Entweder der Name ohne Leerzeichen, so wie er in der Matomo UI angezeigt wird. Oder die technische ID, um den Namen nicht im Quellcode auszugeben.</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_matomo_variant_id" approved="yes">
+                <source>Matomo Variant ID</source>
+                <target>Matomo Varianten ID</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_matomo_variant_id.description" approved="yes">
+                <source>Either the name of the variant, or the technical ID to not expose the name in source code.</source>
+                <target>Entweder der Name ohne Leerzeichen, so wie er in der Matomo UI angezeigt wird. Oder die technische ID, um den Namen nicht im Quellcode auszugeben.</target>
+            </trans-unit>
+            <trans-unit id="pages.tx_abtest_matomo_variant_id.original" approved="yes">
+                <source>Original</source>
+                <target>Original</target>
             </trans-unit>
         </body>
     </file>

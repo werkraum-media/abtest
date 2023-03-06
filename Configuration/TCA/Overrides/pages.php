@@ -10,6 +10,7 @@
         'tx_abtest_variant' => [
             'exclude' => 1,
             'label' => $languagePath . 'tx_abtest_variant',
+            'description' => $languagePath . 'tx_abtest_variant.description',
             'config' => [
                 'type' => 'group',
                 'allowed' => 'pages',
@@ -31,6 +32,7 @@
         'tx_abtest_cookie_time' => [
             'exclude' => 1,
             'label' => $languagePath . 'tx_abtest_cookie_time',
+            'description' => $languagePath . 'tx_abtest_cookie_time.description',
             'config' => [
                 'type' => 'input',
                 'eval' => 'int',
@@ -50,17 +52,52 @@
         'tx_abtest_counter' => [
             'exclude' => 1,
             'label' => $languagePath . 'tx_abtest_counter',
+            'description' => $languagePath . 'tx_abtest_counter.description',
             'config' => [
                 'type' => 'input',
                 'eval' => 'int',
                 'size' => 10,
             ],
         ],
+
+        'tx_abtest_matomo_experiment_id' => [
+            'exclude' => 1,
+            'label' => $languagePath . 'tx_abtest_matomo_experiment_id',
+            'description' => $languagePath . 'tx_abtest_matomo_experiment_id.description',
+            'config' => [
+                'type' => 'input',
+                'eval' => 'nospace',
+            ],
+        ],
+        'tx_abtest_matomo_variant_id' => [
+            'exclude' => 1,
+            'label' => $languagePath . 'tx_abtest_matomo_variant_id',
+            'description' => $languagePath . 'tx_abtest_matomo_variant_id.description',
+            'config' => [
+                'type' => 'input',
+                'eval' => 'nospace',
+                'valuePicker' => [
+                    'items' => [
+                        [$languagePath . 'tx_abtest_matomo_variant_id.original', 'original'],
+                    ],
+                ],
+            ],
+        ],
     ]);
+
+    $GLOBALS['TCA'][$tableName]['palettes']['tx_abtest_matomo'] = [
+        'showitem' => 'tx_abtest_matomo_experiment_id, tx_abtest_matomo_variant_id',
+    ];
 
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes(
         $tableName,
-        '--div--;' . $languagePath . 'div_title,tx_abtest_variant,tx_abtest_cookie_time,tx_abtest_counter',
+        implode(',', [
+            '--div--;' . $languagePath . 'div_title',
+            'tx_abtest_variant',
+            'tx_abtest_cookie_time',
+            'tx_abtest_counter',
+            '--palette--;' . $languagePath . 'palette_tx_abtest_matomo;tx_abtest_matomo',
+        ]),
         '',
         'after:content_from_pid'
     );

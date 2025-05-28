@@ -1,0 +1,37 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: Classes/MatomoTracker.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 3
+			path: Classes/Middleware/SetCookie.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 12
+			path: Classes/Switcher.php
+
+		-
+			message: '#^Cannot use \+\+ on mixed\.$#'
+			identifier: preInc.type
+			count: 1
+			path: Classes/Switcher.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: Classes/TCA/VariantFilter.php
+
+		-
+			message: '#^Parameter \#1 \$array of static method TYPO3\\CMS\\Core\\Utility\\ArrayUtility\:\:setValueByPath\(\) expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: Configuration/TCA/Overrides/pages.php

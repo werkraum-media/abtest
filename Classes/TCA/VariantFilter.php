@@ -37,6 +37,10 @@ class VariantFilter
 
     public function doFilter(array $parameters): array
     {
+        if (is_array($parameters['values']) === false) {
+            throw new \RuntimeException('"values" was not an array.', 1748435272);
+        }
+
         return array_filter($parameters['values'], [$this, 'filterPage']);
     }
 

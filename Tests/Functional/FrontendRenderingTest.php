@@ -23,38 +23,51 @@ declare(strict_types=1);
 
 namespace WerkraumMedia\ABTest\Tests\Functional;
 
+use PHPUnit\Framework\Attributes\Test;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\HttpFoundation\Cookie;
+use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\TestingFramework\Core\Functional\Framework\Frontend\InternalRequest;
-use TYPO3\TestingFramework\Core\Functional\Framework\Frontend\InternalResponse;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 class FrontendRenderingTest extends FunctionalTestCase
 {
-    protected $testExtensionsToLoad = [
-        'typo3conf/ext/abtest',
-    ];
-
-    protected $pathsToLinkInTestInstance = [
-        'typo3conf/ext/abtest/Tests/Fixtures/Sites' => 'typo3conf/sites',
-    ];
-
     protected function setUp(): void
     {
-        parent::setUp();
+        $this->testExtensionsToLoad = [
+            'werkraummedia/abtest',
+        ];
 
-        $this->setUpBackendUserFromFixture(1);
+        $this->pathsToLinkInTestInstance = [
+            'typo3conf/ext/abtest/Tests/Fixtures/Sites' => 'typo3conf/sites',
+        ];
+
+        $this->configurationToUseInTestInstance = [
+            'FE' => [
+                'debug' => true,
+            ],
+            'SYS' => [
+                'caching' => [
+                    'cacheConfigurations' => [
+                        'pages' => [
+                            'backend' => Typo3DatabaseBackend::class,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        parent::setUp();
 
         $this->importCSVDataSet(__DIR__ . '/../Fixtures/BasicDatabase.csv');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function opensDefaultPageIfNothingIsConfigured(): void
     {
         $request = new InternalRequest();
         $request = $request->withPageId(1);
-        $response = $this->executeFrontendRequest($request);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         self::assertSame('', $response->getHeaderLine('Set-Cookie'));
@@ -63,14 +76,12 @@ class FrontendRenderingTest extends FunctionalTestCase
         $this->assertCounterOfPage(1, 0);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function opensVariantAForFirstVisitor(): void
     {
         $request = new InternalRequest();
         $request = $request->withPageId(2);
-        $response = $this->executeFrontendRequest($request);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('Page 2 Title (Variant A)', $response->getBody()->__toString());
@@ -79,16 +90,14 @@ class FrontendRenderingTest extends FunctionalTestCase
         $this->assertCounterOfPage(2, 1);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function opensVariantBForSecondVisitor(): void
     {
         $this->opensVariantAForFirstVisitor();
 
         $request = new InternalRequest();
         $request = $request->withPageId(2);
-        $response = $this->executeFrontendRequest($request);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('Page 3 Title (Variant B)', $response->getBody()->__toString());
@@ -98,17 +107,15 @@ class FrontendRenderingTest extends FunctionalTestCase
         $this->assertCounterOfPage(3, 1);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function opensVariantStoredInCookie(): void
     {
         $this->opensVariantAForFirstVisitor();
 
         $request = new InternalRequest();
         $request = $request->withPageId(2);
-        $request = $request->withAddedHeader('Cookie', 'ab-2=2');
-        $response = $this->executeFrontendRequest($request);
+        $request = $request->withCookieParams(['ab-2' => '2']);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('Page 2 Title (Variant A)', $response->getBody()->__toString());
@@ -119,15 +126,13 @@ class FrontendRenderingTest extends FunctionalTestCase
         $this->assertCounterOfPage(3, 0, 'Opening from cookie should not increase counter.');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function opensDefaultPageIfBotWasDetected(): void
     {
         $request = new InternalRequest();
         $request = $request->withPageId(2);
         $request = $request->withAddedHeader('User-Agent', 'Storebot-Google');
-        $response = $this->executeFrontendRequest($request);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('Page 2 Title (Variant A)', $response->getBody()->__toString());
@@ -136,15 +141,13 @@ class FrontendRenderingTest extends FunctionalTestCase
         $this->assertCounterOfPage(2, 0);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function opensRequestedPageIfVariantPageDoesNotExist(): void
     {
         $request = new InternalRequest();
         $request = $request->withPageId(4);
-        $request = $request->withAddedHeader('Cookie', 'ab-4=5');
-        $response = $this->executeFrontendRequest($request);
+        $request = $request->withCookieParams(['ab-4' => '5']);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('Page 4 Title (Variant A)', $response->getBody()->__toString());
@@ -154,15 +157,13 @@ class FrontendRenderingTest extends FunctionalTestCase
         $this->assertCounterOfPage(5, 0);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function opensRequestedPageIfCookieDoesNotMatchRequestedPage(): void
     {
         $request = new InternalRequest();
         $request = $request->withPageId(2);
-        $request = $request->withAddedHeader('Cookie', 'ab-2=5');
-        $response = $this->executeFrontendRequest($request);
+        $request = $request->withCookieParams(['ab-2' => '5']);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('Page 2 Title (Variant A)', $response->getBody()->__toString());
@@ -172,17 +173,15 @@ class FrontendRenderingTest extends FunctionalTestCase
         $this->assertCounterOfPage(5, 0);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function opensVariantBForSecondVisitorIfVariantFromCookieDoesNotMatchVariantB(): void
     {
         $this->opensVariantAForFirstVisitor();
 
         $request = new InternalRequest();
         $request = $request->withPageId(2);
-        $request = $request->withAddedHeader('Cookie', 'ab-2=5');
-        $response = $this->executeFrontendRequest($request);
+        $request = $request->withCookieParams(['ab-2' => '5']);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('Page 3 Title (Variant B)', $response->getBody()->__toString());
@@ -192,28 +191,24 @@ class FrontendRenderingTest extends FunctionalTestCase
         $this->assertCounterOfPage(3, 1);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function cookieHasDefaultLifetime(): void
     {
         $request = new InternalRequest();
         $request = $request->withPageId(2);
-        $response = $this->executeFrontendRequest($request);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         $cookie = Cookie::fromString($response->getHeaderLine('Set-Cookie'));
         self::assertSame(604800, $cookie->getMaxAge());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function cookieHasConfiguredLifetime(): void
     {
         $request = new InternalRequest();
         $request = $request->withPageId(4);
-        $response = $this->executeFrontendRequest($request);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         $cookie = Cookie::fromString($response->getHeaderLine('Set-Cookie'));
@@ -225,34 +220,33 @@ class FrontendRenderingTest extends FunctionalTestCase
      * The first call should create a proper cache entry.
      * We should still be able to retrieve the other variant by adding the cookie.
      * The 2nd variant should also be delivered from cache on 2nd request.
-     *
-     * @test
      */
+    #[Test]
     public function returnsCachedPage(): void
     {
         $request = new InternalRequest();
         $request = $request->withPageId(2);
-        $response = $this->executeFrontendRequest($request);
+        $response = $this->executeFrontendSubRequest($request);
         self::assertStringContainsString('Page 2 Title (Variant A)', $response->getBody()->__toString());
         $this->assertPageIsNotCached($response);
 
         $request = new InternalRequest();
         $request = $request->withPageId(2);
-        $request = $request->withAddedHeader('Cookie', 'ab-2=2');
-        $response = $this->executeFrontendRequest($request);
+        $request = $request->withCookieParams(['ab-2' => '2']);
+        $response = $this->executeFrontendSubRequest($request);
         self::assertStringContainsString('Page 2 Title (Variant A)', $response->getBody()->__toString());
         $this->assertPageIsCached($response);
 
         $request = new InternalRequest();
         $request = $request->withPageId(2);
-        $response = $this->executeFrontendRequest($request);
+        $response = $this->executeFrontendSubRequest($request);
         self::assertStringContainsString('Page 3 Title (Variant B)', $response->getBody()->__toString());
         $this->assertPageIsNotCached($response);
 
         $request = new InternalRequest();
         $request = $request->withPageId(2);
-        $request = $request->withAddedHeader('Cookie', 'ab-2=3');
-        $response = $this->executeFrontendRequest($request);
+        $request = $request->withCookieParams(['ab-2' => '3']);
+        $response = $this->executeFrontendSubRequest($request);
         self::assertStringContainsString('Page 3 Title (Variant B)', $response->getBody()->__toString());
         $this->assertPageIsCached($response);
     }
@@ -276,7 +270,7 @@ class FrontendRenderingTest extends FunctionalTestCase
     }
 
     private function assertCookie(
-        InternalResponse $response,
+        ResponseInterface $response,
         string $name,
         string $value
     ): void {
@@ -288,7 +282,7 @@ class FrontendRenderingTest extends FunctionalTestCase
         self::assertNull($cookie->getDomain());
     }
 
-    private function assertCookieWasNotSet(InternalResponse $response): void
+    private function assertCookieWasNotSet(ResponseInterface $response): void
     {
         self::assertSame(
             '',
@@ -297,12 +291,12 @@ class FrontendRenderingTest extends FunctionalTestCase
         );
     }
 
-    private function assertPageIsNotCached(InternalResponse $response): void
+    private function assertPageIsNotCached(ResponseInterface $response): void
     {
         self::assertSame('', $response->getHeaderLine('X-TYPO3-Debug-Cache'));
     }
 
-    private function assertPageIsCached(InternalResponse $response): void
+    private function assertPageIsCached(ResponseInterface $response): void
     {
         self::assertStringStartsWith('Cached page generated', $response->getHeaderLine('X-TYPO3-Debug-Cache'));
     }

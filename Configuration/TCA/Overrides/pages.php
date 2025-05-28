@@ -1,5 +1,7 @@
 <?php
 
+use TYPO3\CMS\Core\Utility\ArrayUtility;
+
 (static function (
     string $extensionName = 'abtest',
     string $tableName = 'pages'
@@ -34,8 +36,7 @@
             'label' => $languagePath . 'tx_abtest_cookie_time',
             'description' => $languagePath . 'tx_abtest_cookie_time.description',
             'config' => [
-                'type' => 'input',
-                'eval' => 'int',
+                'type' => 'number',
                 'size' => 10,
                 'valuePicker' => [
                     'items' => [
@@ -54,8 +55,7 @@
             'label' => $languagePath . 'tx_abtest_counter',
             'description' => $languagePath . 'tx_abtest_counter.description',
             'config' => [
-                'type' => 'input',
-                'eval' => 'int',
+                'type' => 'number',
                 'size' => 10,
             ],
         ],
@@ -85,9 +85,9 @@
         ],
     ]);
 
-    $GLOBALS['TCA'][$tableName]['palettes']['tx_abtest_matomo'] = [
+    $GLOBALS['TCA'] = ArrayUtility::setValueByPath($GLOBALS['TCA'], $tableName . '/palettes/tx_abtest_matomo', [
         'showitem' => 'tx_abtest_matomo_experiment_id, tx_abtest_matomo_variant_id',
-    ];
+    ]);
 
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addToAllTCAtypes(
         $tableName,

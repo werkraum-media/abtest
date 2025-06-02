@@ -1,9 +1,5 @@
 # abtest TYPO3 Extension
 
-ABANDONED.
-
-We no longer use the extension ourself. Feel free to maintain a fork.
-
 Extension for A/B-Tests
 
 This extension supports TYPO3 administrators in performing A/B tests. This is useful when a site owner want to measure whether a new version improves or reduces user interaction compared to the current version.
@@ -39,3 +35,14 @@ You can disable the corresponding event listener and hide the corresponding fiel
 This extension currently does not support typeNum.
 
 It always checks requested page for a variant, and it always adds the tracking code.
+
+### Changelog
+
+#### v2.0.0
+
+* TYPO3 v13 + matching PHP versions
+
+#### v1.0.0
+
+* Integrate matomo tracking.
+* TYPO3 v11

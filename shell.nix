@@ -2,7 +2,7 @@
 
 let
 
-  php = pkgs.php81.buildEnv {
+  php = pkgs.php83.buildEnv {
     extensions = { enabled, all }: enabled ++ (with all; [
       xdebug
     ]);
@@ -24,7 +24,7 @@ let
       composer
     ];
     text = ''
-      composer install --no-interaction --prefer-dist --no-progress --working-dir="$PROJECT_ROOT"
+      composer update --no-interaction --prefer-dist --no-progress --working-dir="$PROJECT_ROOT"
     '';
   };
   projectValidateComposer = pkgs.writeShellApplication {
@@ -47,9 +47,8 @@ let
     text = ''
       project-install
       xmllint --schema vendor/phpunit/phpunit/phpunit.xsd --noout phpunit.xml.dist
-      wget --no-check-certificate https://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd --output-document=xliff-core-1.2-strict.xsd
       # shellcheck disable=SC2046
-      xmllint --schema xliff-core-1.2-strict.xsd --noout $(find Resources -name '*.xlf')
+      xmllint --noout $(find Resources -name '*.xlf')
     '';
   };
   projectCodingGuideline = pkgs.writeShellApplication {
@@ -64,12 +63,13 @@ let
     '';
   };
 
-in pkgs.mkShell {
+in pkgs.mkShellNoCC {
   name = "TYPO3 Extension abtest";
   buildInputs = [
     php
     composer
 
+    projectInstall
     projectValidateComposer
     projectValidateXml
     projectCodingGuideline

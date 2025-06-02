@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace WerkraumMedia\ABTest;
 
+use TYPO3\CMS\Frontend\Event\AfterCacheableContentIsGeneratedEvent;
 use WerkraumMedia\ABTest\Events\SwitchedToVariant;
 
 class MatomoTracker
@@ -33,18 +34,18 @@ class MatomoTracker
 
     public function handleVariant(SwitchedToVariant $event): void
     {
-        $this->experiment = $event->getOriginalPage()['tx_abtest_matomo_experiment_id'] ?? '';
-        $this->variation = $event->getVariantPage()['tx_abtest_matomo_variant_id'] ?? '';
+        $this->experiment = (string)($event->getOriginalPage()['tx_abtest_matomo_experiment_id'] ?? '');
+        $this->variation = (string)($event->getVariantPage()['tx_abtest_matomo_variant_id'] ?? '');
     }
 
-    public function addScriptToHtmlMarkup(string $markup): string
+    public function addScriptToHtmlMarkup(AfterCacheableContentIsGeneratedEvent $event): void
     {
         if ($this->experiment === '' || $this->variation === '') {
-            return $markup;
+            return;
         }
 
         $script = $this->generateScript();
-        return str_replace('</body>', $script . '</body>', $markup);
+        $event->getController()->content = str_replace('</body>', $script . '</body>', $event->getController()->content);
     }
 
     private function generateScript(): string

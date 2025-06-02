@@ -17,14 +17,13 @@ jobs:
         run: nix-shell --pure --run project-validate-composer
 
   php-linting:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         php-version:
-          - 7.4
-          - 8.0
-          - 8.1
           - 8.2
+          - 8.3
+          - 8.4
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -64,14 +63,13 @@ jobs:
         run: nix-shell --pure --run project-coding-guideline
 
   code-quality:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         include:
-          - php-version: '7.4'
-          - php-version: '8.0'
-          - php-version: '8.1'
           - php-version: '8.2'
+          - php-version: '8.3'
+          - php-version: '8.4'
     steps:
       - uses: actions/checkout@v3
 
@@ -83,20 +81,19 @@ jobs:
           tools: composer:v2
 
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
+        run: composer update --no-interaction --prefer-dist --no-progress
 
       - name: Code Quality (by PHPStan)
         run: ./vendor/bin/phpstan analyse
 
   tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         include:
-          - php-version: '7.4'
-          - php-version: '8.0'
-          - php-version: '8.1'
           - php-version: '8.2'
+          - php-version: '8.3'
+          - php-version: '8.4'
     steps:
       - uses: actions/checkout@v3
 
@@ -121,7 +118,7 @@ jobs:
           done
 
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
+        run: composer update --no-interaction --prefer-dist --no-progress
 
       - name: PHPUnit Tests
         env:

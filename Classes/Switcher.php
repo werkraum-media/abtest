@@ -24,9 +24,9 @@ declare(strict_types=1);
 namespace WerkraumMedia\ABTest;
 
 use DeviceDetector\DeviceDetector;
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
-use TYPO3\CMS\Core\Http\ServerRequest;
-use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
+use TYPO3\CMS\Frontend\Event\BeforePageIsResolvedEvent;
 use WerkraumMedia\ABTest\Events\SwitchedToVariant;
 
 /**
@@ -46,18 +46,13 @@ class Switcher
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function switch(TypoScriptFrontendController $frontendController): void
+    public function switch(BeforePageIsResolvedEvent $event): void
     {
-        if ($this->isRequestByBot()) {
+        if ($this->isRequestByBot($event->getRequest())) {
             return;
         }
 
-        $currentPageId = $frontendController->id;
-        if (is_numeric($currentPageId) === false) {
-            return;
-        }
-
-        $currentPageId = (int)$currentPageId;
+        $currentPageId = $event->getPageInformation()->getId();
         if ($currentPageId === 0) {
             return;
         }
@@ -67,13 +62,13 @@ class Switcher
             return;
         }
 
-        $requestedViaCookie = (int)($this->getRequest()->getCookieParams()['ab-' . $currentPageId] ?? '0');
+        $requestedViaCookie = (int)($event->getRequest()->getCookieParams()['ab-' . $currentPageId] ?? '0');
         $targetPage = $this->getTargetPage($currentPagePropertiesArray, $requestedViaCookie);
 
-        if ($frontendController->id !== (int)$targetPage['uid']) {
-            $frontendController->id = (int)$targetPage['uid'];
-            $frontendController->contentPid = (int)$targetPage['uid'];
-            $frontendController->page = $targetPage;
+        if ($event->getPageInformation()->getId() !== (int)$targetPage['uid']) {
+            $event->getPageInformation()->setId((int)$targetPage['uid']);
+            $event->getPageInformation()->setContentFromPid((int)$targetPage['uid']);
+            $event->getPageInformation()->setPageRecord($targetPage);
         }
 
         if (
@@ -89,10 +84,10 @@ class Switcher
         ));
     }
 
-    private function isRequestByBot(): bool
+    private function isRequestByBot(ServerRequestInterface $request): bool
     {
         $deviceDetector = new DeviceDetector();
-        $deviceDetector->setUserAgent($_SERVER['HTTP_USER_AGENT']);
+        $deviceDetector->setUserAgent($request->getHeaderLine('User-Agent'));
         try {
             $deviceDetector->parse();
             return $deviceDetector->isBot();
@@ -100,11 +95,6 @@ class Switcher
         }
 
         return false;
-    }
-
-    private function getRequest(): ServerRequest
-    {
-        return $GLOBALS['TYPO3_REQUEST'];
     }
 
     private function getTargetPage(array $page, int $cookiePageUid): array

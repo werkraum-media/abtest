@@ -1,5 +1,6 @@
 config {
     debug = 1
+    sendCacheHeaders = 1
 }
 
 page = PAGE

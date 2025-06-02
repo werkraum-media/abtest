@@ -23,79 +23,72 @@ declare(strict_types=1);
 
 namespace WerkraumMedia\ABTest\Tests\Functional;
 
+use PHPUnit\Framework\Attributes\Test;
+use Psr\Http\Message\ResponseInterface;
 use TYPO3\TestingFramework\Core\Functional\Framework\Frontend\InternalRequest;
-use TYPO3\TestingFramework\Core\Functional\Framework\Frontend\InternalResponse;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 class MatomoTrackingTest extends FunctionalTestCase
 {
-    protected $testExtensionsToLoad = [
-        'typo3conf/ext/abtest',
-    ];
-
-    protected $pathsToLinkInTestInstance = [
-        'typo3conf/ext/abtest/Tests/Fixtures/Sites' => 'typo3conf/sites',
-    ];
-
     protected function setUp(): void
     {
-        parent::setUp();
+        $this->testExtensionsToLoad = [
+            'werkraummedia/abtest',
+        ];
 
-        $this->setUpBackendUserFromFixture(1);
+        $this->pathsToLinkInTestInstance = [
+            'typo3conf/ext/abtest/Tests/Fixtures/Sites' => 'typo3conf/sites',
+        ];
+
+        parent::setUp();
 
         $this->importCSVDataSet(__DIR__ . '/../Fixtures/BasicMatomoDatabase.csv');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function rendersPageWithoutVariantWithoutMatomo(): void
     {
         $request = new InternalRequest();
         $request = $request->withPageId(1);
-        $response = $this->executeFrontendRequest($request);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('Page 1 Title (No Variant)', $response->getBody()->__toString());
         $this->assertNoMatomoTrackingCode($response);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function rendersVariantAWithMatomo(): void
     {
         $request = new InternalRequest();
         $request = $request->withPageId(2);
-        $response = $this->executeFrontendRequest($request);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('Page 2 Title (Variant A)', $response->getBody()->__toString());
         $this->assertMatomoTrackingCode($response, 'TestForDevelopment', 'VariationA');
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function rendersVariantBWithMatomo(): void
     {
         $request = new InternalRequest();
         $request = $request->withPageId(2);
-        $request = $request->withAddedHeader('Cookie', 'ab-2=3');
-        $response = $this->executeFrontendRequest($request);
+        $request = $request->withCookieParams(['ab-2' => '3']);
+        $response = $this->executeFrontendSubRequest($request);
 
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('Page 3 Title (Variant B)', $response->getBody()->__toString());
         $this->assertMatomoTrackingCode($response, 'TestForDevelopment', 'VariationB');
     }
 
-    private function assertNoMatomoTrackingCode(InternalResponse $response): void
+    private function assertNoMatomoTrackingCode(ResponseInterface $response): void
     {
         self::assertStringNotContainsString('_paq.push', $response->getBody()->__toString());
     }
 
     private function assertMatomoTrackingCode(
-        InternalResponse $response,
+        ResponseInterface $response,
         string $experiment,
         string $variation
     ): void {

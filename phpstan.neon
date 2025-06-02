@@ -1,9 +1,11 @@
+includes:
+  - 'phpstan-baseline.neon'
 parameters:
-  level: max
+  level: 'max'
   paths:
-    - Classes
-    - Configuration
-    - Tests
-  checkMissingIterableValueType: false
+    - 'Classes'
+    - 'Configuration'
+    - 'Tests'
   reportUnmatchedIgnoredErrors: false
-  checkGenericClassInNonGenericObjectType: false
+  ignoreErrors:
+    - identifier: 'missingType.iterableValue'

@@ -7,4 +7,4 @@
 ,5,1,"/page-5","Page 5 Title (Variant B)",0,1,604800
 "sys_template"
 ,"uid","pid","root","clear","constants","config"
-,1,1,1,3,"databasePlatform = mysql","<INCLUDE_TYPOSCRIPT: source=""FILE:EXT:abtest/Tests/Fixtures/FrontendRendering.typoscript"">"
+,1,1,1,3,"databasePlatform = mysql","@import 'EXT:abtest/Tests/Fixtures/FrontendRendering.typoscript'"
